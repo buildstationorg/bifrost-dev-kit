@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.28;
+pragma solidity 0.8.30;
 
 import {L2Slpx} from "src/L2Slpx/L2Slpx.sol";
 import {vETH} from "src/L2Slpx/vETH.sol";
