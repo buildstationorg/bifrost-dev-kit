@@ -10,6 +10,16 @@ vDOTAddress: address 0x8bFA30329F2A7A7b72fa4A76FdcE8aC92284bb94
 DOTAddress: address 0x4B16E254E7848e0826eBDd3049474fD9E70A244c
 ```
 
+## Arbitrum Sepolia
+
+```bash
+== Return ==
+l2SlpxAddress: address 0x62CA64454046BbC18e35066A6350Acb0378EB3c2
+vETHAddress: address 0x0E011f93777B00f48B881B1Cabc5F0A6395BdC02
+vDOTAddress: address 0x6C0AAb3F91C4e49F6442CCEb65973778Ab0A177A
+DOTAddress: address 0x3A8EDecAb3E4178f06dD57be13676195571fEA2f
+```
+
 ## Base Sepolia
 
 ```bash

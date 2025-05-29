@@ -16,7 +16,4 @@ arbitrum-sepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
 unichain-sepolia = "${UNICHAIN_SEPOLIA_RPC_URL}"
 
 [etherscan]
-sepolia = { key = "${SEPOLIA_ETHERSCAN_API_KEY}", chain = "sepolia", url = "https://api-sepolia.etherscan.io/api"}
-base-sepolia = { key = "${BASE_SEPOLIA_ETHERSCAN_API_KEY}", chain = "base-sepolia", url = "https://api-sepolia.basescan.org/api" }
-arbitrum-sepolia = { key = "${ARBITRUM_SEPOLIA_ETHERSCAN_API_KEY}", chain = "arbitrum-sepolia", url = "hhttps://api-sepolia.arbiscan.io/api" }
-unichain-sepolia = { key = "${UNICHAIN_SEPOLIA_ETHERSCAN_API_KEY}", chain = "unichain-sepolia", url = "https://api-sepolia.uniscan.xyz/api" }
+mainnet = { key = "${ETHERSCAN_API_KEY}" }
