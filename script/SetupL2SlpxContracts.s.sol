@@ -11,10 +11,10 @@ import { DOT } from "src/L2Slpx/DOT.sol";
 contract SetupAllContracts is Script {
     function run() external {
         /// @dev declare the address of the owner
-        address l2SlpxAddress = 0x85bb6d27571C3175c81fe212c0decCA2202147b9;
-        address vETHAddress = 0x7f6708716FDDFA4c2674eFa4ee20deF1b4d5C5aD;
-        address vDOTAddress = 0x5fD7476f615C53929922130DC8bf297e1a011f75;
-        address DOTAddress = 0x61E214E7d4DF2e619AF3F2eF4E590ABa4480259F;
+        address l2SlpxAddress = 0x62CA64454046BbC18e35066A6350Acb0378EB3c2;
+        address vETHAddress = 0x0E011f93777B00f48B881B1Cabc5F0A6395BdC02;
+        address vDOTAddress = 0x6C0AAb3F91C4e49F6442CCEb65973778Ab0A177A;
+        address DOTAddress = 0x3A8EDecAb3E4178f06dD57be13676195571fEA2f;
         uint256 MIN_ETH_ORDER_AMOUNT = 0.001 ether;
         uint256 ETH_TO_VETH_TOKEN_CONVERSION_RATE = 0.898e18;
         uint256 ETH_ORDER_FEE = 0.01e18;
