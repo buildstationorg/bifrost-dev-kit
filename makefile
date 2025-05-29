@@ -15,6 +15,21 @@ deploy-testnet:
 deploy-all-contracts-on-all-networks:
 	forge script script/DeployAllContracts.s.sol --slow --multi --broadcast --account dev --sender ${SENDER} --verify -vvvv
 
+deploy-l2slpx-unichain-sepolia-with-create3:
+	forge script script/DeployL2SlpxContracts.s.sol --rpc-url ${UNICHAIN_SEPOLIA_RPC_URL} --account dev --sender ${SENDER} --broadcast --verify --etherscan-api-key ${UNICHAIN_SEPOLIA_ETHERSCAN_API_KEY} -vvvv
+
+deploy-l2slpx-unichain-sepolia:
+	forge script script/DeployL2SlpxContracts.s.sol --rpc-url ${UNICHAIN_SEPOLIA_RPC_URL} --account dev --sender ${SENDER} --broadcast --verify --verifier-url "https://api-sepolia.uniscan.xyz/api" --verifier-api-key ${UNICHAIN_SEPOLIA_ETHERSCAN_API_KEY} -vvvv
+
+setup-l2slpx-unichain-sepolia:
+	forge script script/SetupL2SlpxContracts.s.sol --rpc-url ${UNICHAIN_SEPOLIA_RPC_URL} --account dev --sender ${SENDER} --broadcast -vvvv
+
+deploy-l2slpx-base:
+	forge script script/DeployL2SlpxContracts.s.sol --rpc-url ${BASE_SEPOLIA_RPC_URL} --account dev --sender ${SENDER} --broadcast --verify --etherscan-api-key ${ETHERSCAN_API_KEY} -vvvv
+
+deploy-l2slpx-arbitrum:
+	forge script script/DeployL2SlpxContracts.s.sol --rpc-url ${ARBITRUM_SEPOLIA_RPC_URL} --account dev --sender ${SENDER} --broadcast --verify --etherscan-api-key ${ETHERSCAN_API_KEY} -vvvv
+
 setup-all-contracts-on-all-networks:
 	forge script script/SetupAllContracts.s.sol --slow --multi --broadcast --account dev --sender ${SENDER} -vvvv
 

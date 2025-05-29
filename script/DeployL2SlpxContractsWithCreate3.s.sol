@@ -27,9 +27,6 @@ contract CREATE3Deploy is Script {
             type(L2Slpx).creationCode,
             abi.encode(OWNER)
         );
-
-        /// @dev select the sepolia network
-        vm.createSelectFork("sepolia");
         /// @dev start the broadcast
         vm.startBroadcast();
         /// @dev get the predicted address of the L2Slpx contract
@@ -56,25 +53,7 @@ contract CREATE3Deploy is Script {
         bytes32 saltVDOT = bytes32(abi.encodePacked("vdot1"));
         bytes32 saltDOT = bytes32(abi.encodePacked("dot1"));
 
-        console.log("Starting deployment on sepolia");
-        /// @dev select the sepolia network
-        vm.createSelectFork("sepolia");
-        /// @dev start the broadcast
-        vm.startBroadcast();
-        /// @dev call the deploy function of the CREATE3Factory contract to deploy the Counter contract with the salt
-        l2SlpxAddress = create3Factory.deploy(saltL2Slpx, l2SlpxCreationCode);
-        /// @dev deploy the vETH contract
-        vETHAddress = create3Factory.deploy(saltVETH, vETHCreationCode);
-        /// @dev deploy the vDOT contract
-        vDOTAddress = create3Factory.deploy(saltVDOT, vDOTCreationCode);
-        /// @dev deploy the DOT contract
-        DOTAddress = create3Factory.deploy(saltDOT, DOTCreationCode);
-        /// @dev stop the broadcast
-        vm.stopBroadcast();
-
-        console.log("Starting deployment on base-sepolia");
-        /// @dev select the base-sepolia network
-        vm.createSelectFork("base-sepolia");
+        console.log("Starting deployment");
         /// @dev start the broadcast
         vm.startBroadcast();
         /// @dev call the deploy function of the CREATE3Factory contract to deploy the Counter contract with the salt
