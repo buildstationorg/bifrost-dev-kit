@@ -6,7 +6,6 @@ import {L2Slpx} from "src/L2Slpx/L2Slpx.sol";
 import {vETH} from "src/L2Slpx/vETH.sol";
 import {vDOT} from "src/L2Slpx/vDOT.sol";
 import {DOT} from "src/L2Slpx/DOT.sol";
-import {IVToken} from "src/L2Slpx/IVToken.sol";
 import {Test, console} from "forge-std/Test.sol";
 
 contract L2SlpxTest is Test {
