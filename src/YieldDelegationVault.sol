@@ -37,8 +37,14 @@ contract YieldDelegationVault is Ownable {
                             STRUCTS & ENUMS
     //////////////////////////////////////////////////////////////*/
 
+    struct DepositorRecord {
+        uint256[] depositIds;
+        uint256 totalNumberOfDeposits;
+    }
+
     struct VaultDepositRecord {
         uint256 depositId;
+        uint256 indexInDepositorRecord;
         address depositor;
         address tokenAddress;
         uint256 amountDeposited;
@@ -50,7 +56,7 @@ contract YieldDelegationVault is Ownable {
                             MAPPINGS
     //////////////////////////////////////////////////////////////*/
 
-    mapping(address => uint256[]) public addressToDepositIds;
+    mapping(address => DepositorRecord) public addressToDepositorRecord;
     mapping(uint256 => VaultDepositRecord) public depositIdToDepositRecord;
     
 
@@ -84,9 +90,11 @@ contract YieldDelegationVault is Ownable {
         if (tokenAddress == address(veth)) {
             veth.transferFrom(msg.sender, address(this), amount);
             uint256 depositConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
-            addressToDepositIds[msg.sender].push(currentDepositId);
+            addressToDepositorRecord[msg.sender].depositIds.push(currentDepositId);
+            addressToDepositorRecord[msg.sender].totalNumberOfDeposits++;
             depositIdToDepositRecord[currentDepositId] = VaultDepositRecord({
                 depositId: currentDepositId,
+                indexInDepositorRecord: addressToDepositorRecord[msg.sender].totalNumberOfDeposits - 1,
                 depositor: msg.sender,
                 tokenAddress: address(veth),
                 amountDeposited: amount,
@@ -99,9 +107,11 @@ contract YieldDelegationVault is Ownable {
         if (tokenAddress == address(vdot)) {
             vdot.transferFrom(msg.sender, address(this), amount);
             uint256 depositConversionRate = l2Slpx.getTokenConversionInfo(address(vdot)).tokenConversionRate;
-            addressToDepositIds[msg.sender].push(currentDepositId);
+            addressToDepositorRecord[msg.sender].depositIds.push(currentDepositId);
+            addressToDepositorRecord[msg.sender].totalNumberOfDeposits++;
             depositIdToDepositRecord[currentDepositId] = VaultDepositRecord({
                 depositId: currentDepositId,
+                indexInDepositorRecord: addressToDepositorRecord[msg.sender].totalNumberOfDeposits - 1,
                 depositor: msg.sender,
                 tokenAddress: address(vdot),
                 amountDeposited: amount,
@@ -121,12 +131,25 @@ contract YieldDelegationVault is Ownable {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
             uint256 amountOfUnderlyingDeposited = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
             uint256 amountToWithdraw = amountOfUnderlyingDeposited * withdrawalConversionRate / 1e18;
+            // remove the deposit id from the depositor record
+            addressToDepositorRecord[msg.sender].depositIds[depositRecord.indexInDepositorRecord] = addressToDepositorRecord[msg.sender].depositIds[addressToDepositorRecord[msg.sender].totalNumberOfDeposits - 1];
+            addressToDepositorRecord[msg.sender].depositIds.pop();
+            addressToDepositorRecord[msg.sender].totalNumberOfDeposits--;
+            delete depositIdToDepositRecord[depositId];
+            // transfer the veth to the user
             veth.transfer(msg.sender, amountToWithdraw);
+            emit Withdraw(msg.sender, depositId, depositRecord.tokenAddress, amountToWithdraw, withdrawalConversionRate);
         }
         if (depositRecord.tokenAddress == address(vdot)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
             uint256 amountOfUnderlyingDeposited = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
             uint256 amountToWithdraw = amountOfUnderlyingDeposited * withdrawalConversionRate / 1e18;
+            // remove the deposit id from the depositor record
+            addressToDepositorRecord[msg.sender].depositIds[depositRecord.indexInDepositorRecord] = addressToDepositorRecord[msg.sender].depositIds[addressToDepositorRecord[msg.sender].totalNumberOfDeposits - 1];
+            addressToDepositorRecord[msg.sender].depositIds.pop();
+            addressToDepositorRecord[msg.sender].totalNumberOfDeposits--;
+            delete depositIdToDepositRecord[depositId];
+            // transfer the vdot to the user
             vdot.transfer(msg.sender, amountToWithdraw);
             emit Withdraw(msg.sender, depositId, depositRecord.tokenAddress, amountToWithdraw, withdrawalConversionRate);
         }
@@ -137,6 +160,17 @@ contract YieldDelegationVault is Ownable {
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     // TODO: Implement ERC721 logic for positions
+
+    /*//////////////////////////////////////////////////////////////
+                            GETTERS
+    //////////////////////////////////////////////////////////////*/
+    function getDepositorRecord(address depositor) public view returns (DepositorRecord memory) {
+        return addressToDepositorRecord[depositor];
+    }
+
+    function getVaultDepositRecord(uint256 depositId) public view returns (VaultDepositRecord memory) {
+        return depositIdToDepositRecord[depositId];
+    }
 
 
     /*//////////////////////////////////////////////////////////////

@@ -43,7 +43,7 @@ contract L2SlpxTest is Test {
 
     function test_createOrderETH() public {
         vm.startPrank(USER);
-        l2Slpx.createOrder{value: 1 ether}(address(0), 1 ether, L2Slpx.Operation.Mint, "meme");
+        l2Slpx.createOrder{value: 1 ether}(address(0), 1 ether, L2Slpx.Operation.Mint, "bifrost");
         vm.stopPrank();
         assertEq(veth.balanceOf(USER), 0.792e18);
     }
@@ -51,17 +51,17 @@ contract L2SlpxTest is Test {
     function test_createOrderERC20() public {
         vm.startPrank(USER);
         dot.approve(address(l2Slpx), 10e18);
-        l2Slpx.createOrder(address(dot), 10e18, L2Slpx.Operation.Mint, "meme");
+        l2Slpx.createOrder(address(dot), 10e18, L2Slpx.Operation.Mint, "bifrost");
         vm.stopPrank();
         assertEq(vdot.balanceOf(USER), 6.93e18);
     }
 
     function test_createOrderETH_Redeem() public {
         vm.startPrank(USER);
-        l2Slpx.createOrder{value: 1 ether}(address(0), 1 ether, L2Slpx.Operation.Mint, "meme");
+        l2Slpx.createOrder{value: 1 ether}(address(0), 1 ether, L2Slpx.Operation.Mint, "bifrost");
         assertEq(veth.balanceOf(USER), 0.792e18);
         veth.approve(address(l2Slpx), veth.balanceOf(USER));
-        l2Slpx.createOrder(address(veth), veth.balanceOf(USER), L2Slpx.Operation.Redeem, "meme");
+        l2Slpx.createOrder(address(veth), veth.balanceOf(USER), L2Slpx.Operation.Redeem, "bifrost");
         assertEq(veth.balanceOf(USER), 0);
         assertEq(address(USER).balance, 999 ether + 0.9801 ether);
         vm.stopPrank();
@@ -70,10 +70,10 @@ contract L2SlpxTest is Test {
     function test_createOrderERC20_Redeem() public {
         vm.startPrank(USER);
         dot.approve(address(l2Slpx), 10e18);
-        l2Slpx.createOrder(address(dot), 10e18, L2Slpx.Operation.Mint, "meme");
+        l2Slpx.createOrder(address(dot), 10e18, L2Slpx.Operation.Mint, "bifrost");
         assertEq(vdot.balanceOf(USER), 6.93e18);
         vdot.approve(address(l2Slpx), vdot.balanceOf(USER));
-        l2Slpx.createOrder(address(vdot), vdot.balanceOf(USER), L2Slpx.Operation.Redeem, "meme");
+        l2Slpx.createOrder(address(vdot), vdot.balanceOf(USER), L2Slpx.Operation.Redeem, "bifrost");
         vm.stopPrank();
         assertEq(vdot.balanceOf(USER), 0);
         assertEq(dot.balanceOf(USER), 9990 ether + 9.801e18);
