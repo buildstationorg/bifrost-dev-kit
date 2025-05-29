@@ -18,6 +18,9 @@ deploy-all-contracts-on-all-networks:
 deploy-l2slpx-bsc-testnet:
 	forge script script/DeployL2SlpxContracts.s.sol --rpc-url ${BSC_TESTNET_RPC_URL} --account dev --sender ${SENDER} --broadcast --with-gas-price 5000000000 --verify --verifier etherscan --etherscan-api-key ${ETHERSCAN_API_KEY} -vvvv
 
+setup-l2slpx-bsc-testnet:
+	forge script script/SetupL2SlpxContracts.s.sol --rpc-url ${BSC_TESTNET_RPC_URL} --account dev --sender ${SENDER} --broadcast -vvvv
+
 deploy-l2slpx-unichain-with-create3:
 	forge script script/DeployL2SlpxContracts.s.sol --rpc-url ${UNICHAIN_SEPOLIA_RPC_URL} --account dev --sender ${SENDER} --broadcast --verify --etherscan-api-key ${UNICHAIN_SEPOLIA_ETHERSCAN_API_KEY} -vvvv
 

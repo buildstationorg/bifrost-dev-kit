@@ -8,13 +8,13 @@ contract SetupL2SlpxContracts is Script {
     function run() external {
         /// @dev declare addresses of the contracts
         /// @dev L2Slpx contract address
-        address l2SlpxAddress = 0x62CA64454046BbC18e35066A6350Acb0378EB3c2;
+        address l2SlpxAddress = 0xC4F238cEdC1f77A0Fe36F60eceDef14336e4eFbe;
         /// @dev vETH contract address
-        address vETHAddress = 0x0E011f93777B00f48B881B1Cabc5F0A6395BdC02;
+        address vETHAddress = 0x66f039Bc124A3f45D3b30BFdD903B72a4857878f;
         /// @dev vDOT contract address
-        address vDOTAddress = 0x6C0AAb3F91C4e49F6442CCEb65973778Ab0A177A;
+        address vDOTAddress = 0x1Ed8c557791e0c98D72387423ab5c215d358E5a4;
         /// @dev DOT contract address
-        address DOTAddress = 0x3A8EDecAb3E4178f06dD57be13676195571fEA2f;
+        address DOTAddress = 0x1dB58359534600b08Fe7061608920f1C47E7b0b0;
 
         /// @dev declare the token conversion info
         uint256 MIN_ETH_ORDER_AMOUNT = 0.001 ether;
