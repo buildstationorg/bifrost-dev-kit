@@ -14,8 +14,7 @@ contract CREATE3Deploy is Script {
         address OWNER = 0x6FaFF29226219756aa40CE648dbc65FB41DE5F72;
         address DEPLOYER = 0x6FaFF29226219756aa40CE648dbc65FB41DE5F72;
 
-        /// @dev declare the address of the CREATE3Factory contract. The address is the same for Kaia mainnet and
-        /// testnet
+        /// @dev declare the address of the CREATE3Factory contract. The address is the same for all supported networks
         address create3FactoryAddress = 0x9fBB3DF7C40Da2e5A0dE984fFE2CCB7C47cd0ABf;
 
         /// @dev initialize the ICREATE3Factory interface

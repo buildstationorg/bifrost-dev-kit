@@ -14,6 +14,7 @@ solmate = "6.8.0"
 [rpc_endpoints]
 sepolia = "${SEPOLIA_RPC_URL}"
 base-sepolia = "${BASE_SEPOLIA_RPC_URL}"
+bsc-testnet = "${BSC_TESTNET_RPC_URL}"
 arbitrum-sepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
 unichain-sepolia = "${UNICHAIN_SEPOLIA_RPC_URL}"
 

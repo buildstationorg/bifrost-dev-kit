@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.30;
 
 import {L2Slpx} from "src/L2Slpx/L2Slpx.sol";

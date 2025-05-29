@@ -1,5 +1,5 @@
 # Bifrost Development Kit
-> A collection of contracts to develop with Bifrost SLPX protocol on mainnet and testnet
+> A collection of contracts to develop with Bifrost SLPX protocol on EVM chains
 
 ## Getting Started
 

@@ -30,6 +30,16 @@ vDOTAddress: address 0x8bFA30329F2A7A7b72fa4A76FdcE8aC92284bb94
 DOTAddress: address 0x4B16E254E7848e0826eBDd3049474fD9E70A244c
 ```
 
+## BSC Testnet
+
+```bash
+== Return ==
+l2SlpxAddress: address 0xC4F238cEdC1f77A0Fe36F60eceDef14336e4eFbe
+vETHAddress: address 0x66f039Bc124A3f45D3b30BFdD903B72a4857878f
+vDOTAddress: address 0x1Ed8c557791e0c98D72387423ab5c215d358E5a4
+DOTAddress: address 0x1dB58359534600b08Fe7061608920f1C47E7b0b0
+```
+
 ## Unichain Sepolia
 
 ```bash
