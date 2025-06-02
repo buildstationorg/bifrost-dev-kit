@@ -68,6 +68,39 @@ contract YieldDelegationVaultTest is Test {
         assertEq(yieldDelegationVault.getVaultDepositRecord(0).depositConversionRate, 0.8e18);
     }
 
+    function test_multipleDeposits() public {
+        vm.startPrank(USER);
+        l2Slpx.createOrder{value: 10 ether}(address(0), 10 ether, L2Slpx.Operation.Mint, "bifrost");
+        // check that the user has the correct balance of veth
+        assertEq(veth.balanceOf(USER), 7.92e18);
+        // approve the veth to be deposited into the vault
+        veth.approve(address(yieldDelegationVault), 1.6 * 2 * 1e18);
+        // deposit 1.6 veth into the vault
+        yieldDelegationVault.deposit(address(veth), 1.6 * 1e18);
+        // deposit another 1.6 veth into the vault
+        yieldDelegationVault.deposit(address(veth), 1.6 * 1e18);
+        vm.stopPrank();
+        // check that the depositor record is correct
+        assertEq(yieldDelegationVault.getDepositorRecord(USER).totalNumberOfDeposits, 2);
+        // check that the deposit id is correct
+        uint256[] memory depositIds = yieldDelegationVault.getDepositorRecord(USER).depositIds;
+        uint256[] memory expectedIds = new uint256[](2);
+        expectedIds[0] = 0;
+        expectedIds[1] = 1;
+        assertEq(depositIds, expectedIds);
+        // check that the vault deposit record is correct
+        assertEq(yieldDelegationVault.getVaultDepositRecord(0).depositId, 0);
+        assertEq(yieldDelegationVault.getVaultDepositRecord(1).depositId, 1);
+        assertEq(yieldDelegationVault.getVaultDepositRecord(0).depositor, USER);
+        assertEq(yieldDelegationVault.getVaultDepositRecord(1).depositor, USER);
+        assertEq(yieldDelegationVault.getVaultDepositRecord(0).tokenAddress, address(veth));
+        assertEq(yieldDelegationVault.getVaultDepositRecord(1).tokenAddress, address(veth));
+        assertEq(yieldDelegationVault.getVaultDepositRecord(0).amountDeposited, 1.6 * 1e18);
+        assertEq(yieldDelegationVault.getVaultDepositRecord(1).amountDeposited, 1.6 * 1e18);
+        assertEq(yieldDelegationVault.getVaultDepositRecord(0).depositConversionRate, 0.8e18);
+        assertEq(yieldDelegationVault.getVaultDepositRecord(1).depositConversionRate, 0.8e18);
+    }
+
     function test_withdrawVethWithNewConversionRate() public {
         vm.startPrank(USER);
         l2Slpx.createOrder{value: 10 ether}(address(0), 10 ether, L2Slpx.Operation.Mint, "bifrost");
@@ -107,5 +140,25 @@ contract YieldDelegationVaultTest is Test {
         // check that the depositor record is correct
         assertEq(yieldDelegationVault.getDepositorRecord(USER).totalNumberOfDeposits, 0);
         assertEq(yieldDelegationVault.getDepositorRecord(USER).depositIds.length, 0);
+    }
+
+    function test_ownerWithdrawYieldVeth() public {
+        vm.startPrank(USER);
+        l2Slpx.createOrder{value: 10 ether}(address(0), 10 ether, L2Slpx.Operation.Mint, "bifrost");
+        // check that the user has the correct balance of veth
+        assertEq(veth.balanceOf(USER), 7.92e18);
+        // approve the veth to be deposited into the vault
+        veth.approve(address(yieldDelegationVault), 1.6 * 2 * 1e18);
+        // deposit 1.6 veth into the vault
+        yieldDelegationVault.deposit(address(veth), 1.6 * 1e18);
+        // deposit another 1.6 veth into the vault
+        yieldDelegationVault.deposit(address(veth), 1.6 * 1e18);
+        vm.stopPrank();
+        vm.startPrank(OWNER);
+        l2Slpx.setTokenConversionInfo(address(veth), L2Slpx.Operation.Redeem, MIN_ETH_ORDER_AMOUNT, 0.6e18, ETH_ORDER_FEE, address(0));
+        yieldDelegationVault.ownerWithdrawYield(address(veth));
+        vm.stopPrank();
+        // check that the user has the correct balance of veth
+        assertEq(veth.balanceOf(OWNER), 0.8 * 1e18);
     }
 }
