@@ -4,7 +4,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {L2Slpx} from "src/L2Slpx/L2Slpx.sol";
 import {vDOT} from "src/L2Slpx/vDOT.sol";
 import {vETH} from "src/L2Slpx/vETH.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract YieldDelegationVault is Ownable {
 
@@ -23,7 +22,7 @@ contract YieldDelegationVault is Ownable {
     //////////////////////////////////////////////////////////////*/
     event Deposit(address indexed user, uint256 depositId, address tokenAddress, uint256 depositedAmount, uint256 depositConversionRate);
     event Withdraw(address indexed user, uint256 depositId, address tokenAddress, uint256 withdrawnAmount, uint256 withdrawalConversionRate);
-    event OwnerWithdrawYield(address indexed owner, uint256 depositId, address tokenAddress, uint256 yield, uint256 withdrawalConversionRate);
+    event OwnerWithdrawYield(address indexed owner, address tokenAddress, uint256 yield, uint256 withdrawalConversionRate);
 
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -34,6 +33,8 @@ contract YieldDelegationVault is Ownable {
     vETH public immutable veth;
     uint256 public currentDepositId;
     uint256 public minimumDepositAmount;
+    uint256 public totalAmountOfEthDeposited;
+    uint256 public totalAmountOfDotDeposited;
 
 
     /*//////////////////////////////////////////////////////////////
@@ -103,6 +104,7 @@ contract YieldDelegationVault is Ownable {
                 amountDeposited: amount,
                 depositConversionRate: depositConversionRate
             });
+            totalAmountOfEthDeposited += amount * 1e18 / depositConversionRate;
             emit Deposit(msg.sender, currentDepositId, address(veth), amount, depositConversionRate);
             currentDepositId++;
         }
@@ -120,7 +122,7 @@ contract YieldDelegationVault is Ownable {
                 amountDeposited: amount,
                 depositConversionRate: depositConversionRate
             });
-
+            totalAmountOfDotDeposited += amount * 1e18 / depositConversionRate;
             emit Deposit(msg.sender, currentDepositId, address(vdot), amount, depositConversionRate);
             currentDepositId++;
         }
@@ -184,31 +186,19 @@ contract YieldDelegationVault is Ownable {
 
     /// @notice Withdraw yield from the vault for the owner
     /// @dev This function is only callable by the owner
-    function ownerWithdrawYield(uint256 depositId) public onlyOwner {
-        VaultDepositRecord memory depositRecord = depositIdToDepositRecord[depositId];
-        if (depositRecord.depositor == address(0)) revert InvalidDepositId();
-        if (depositRecord.tokenAddress == address(veth)) {
+    function ownerWithdrawYield(address tokenAddress) public onlyOwner {
+        if (tokenAddress != address(vdot) && tokenAddress != address(veth)) revert InvalidTokenAddress();
+        if (tokenAddress == address(veth)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
-            uint256 amountOfUnderlyingDeposited = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
-            uint256 amountToBeWithdrawnByDepositor = amountOfUnderlyingDeposited * withdrawalConversionRate / 1e18;
-            uint256 yield = depositRecord.amountDeposited - amountToBeWithdrawnByDepositor;
-
-            if (yield > 0) {
-                veth.transfer(msg.sender, yield);
-                emit OwnerWithdrawYield(msg.sender, depositId, address(veth), yield, withdrawalConversionRate);
-            }
+            uint256 totalAmountToCoverUnderlying = totalAmountOfEthDeposited * withdrawalConversionRate / 1e18;
+            uint256 yield = veth.balanceOf(address(this)) - totalAmountToCoverUnderlying;
+            emit OwnerWithdrawYield(msg.sender, address(veth), yield, withdrawalConversionRate);
         }
-
-        if (depositRecord.tokenAddress == address(vdot)) {
+        if (tokenAddress == address(vdot)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(vdot)).tokenConversionRate;
-            uint256 amountOfUnderlyingDeposited = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
-            uint256 amountToBeWithdrawnByDepositor = amountOfUnderlyingDeposited * withdrawalConversionRate / 1e18;
-            uint256 yield = depositRecord.amountDeposited - amountToBeWithdrawnByDepositor;
-
-            if (yield > 0) {
-                vdot.transfer(msg.sender, yield);
-                emit OwnerWithdrawYield(msg.sender, depositId, address(vdot), yield, withdrawalConversionRate);
-            }
+            uint256 totalAmountToCoverUnderlying = totalAmountOfDotDeposited * withdrawalConversionRate / 1e18;
+            uint256 yield = vdot.balanceOf(address(this)) - totalAmountToCoverUnderlying;
+            emit OwnerWithdrawYield(msg.sender, address(vdot), yield, withdrawalConversionRate);
         }
     }
 
