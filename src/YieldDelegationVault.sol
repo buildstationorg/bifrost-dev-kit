@@ -14,6 +14,7 @@ contract YieldDelegationVault is Ownable {
     error InvalidTokenAddress();
     error InsufficientShares();
     error NotDepositor();
+    error InvalidDepositId();
 
 
     /*//////////////////////////////////////////////////////////////
@@ -21,7 +22,7 @@ contract YieldDelegationVault is Ownable {
     //////////////////////////////////////////////////////////////*/
     event Deposit(address indexed user, uint256 depositId, address tokenAddress, uint256 depositedAmount, uint256 depositConversionRate);
     event Withdraw(address indexed user, uint256 depositId, address tokenAddress, uint256 withdrawnAmount, uint256 withdrawalConversionRate);
-    event OwnerWithdrawYield(address indexed tokenAddress, uint256 amount);
+    event OwnerWithdrawYield(address indexed owner, uint256 depositId, address tokenAddress, uint256 yield, uint256 withdrawalConversionRate);
 
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -100,8 +101,8 @@ contract YieldDelegationVault is Ownable {
                 amountDeposited: amount,
                 depositConversionRate: depositConversionRate
             });
-            currentDepositId++;
             emit Deposit(msg.sender, currentDepositId, address(veth), amount, depositConversionRate);
+            currentDepositId++;
         }
 
         if (tokenAddress == address(vdot)) {
@@ -117,8 +118,9 @@ contract YieldDelegationVault is Ownable {
                 amountDeposited: amount,
                 depositConversionRate: depositConversionRate
             });
-            currentDepositId++;
+
             emit Deposit(msg.sender, currentDepositId, address(vdot), amount, depositConversionRate);
+            currentDepositId++;
         }
     }
 
@@ -126,6 +128,7 @@ contract YieldDelegationVault is Ownable {
     /// @param depositId The id of the deposit
     function withdraw(uint256 depositId) public {
         VaultDepositRecord memory depositRecord = depositIdToDepositRecord[depositId];
+        if (depositRecord.depositor == address(0)) revert InvalidDepositId();
         if (depositRecord.depositor != msg.sender) revert NotDepositor();
         if (depositRecord.tokenAddress == address(veth)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
@@ -179,13 +182,40 @@ contract YieldDelegationVault is Ownable {
 
     /// @notice Withdraw yield from the vault for the owner
     /// @dev This function is only callable by the owner
-    function ownerWithdrawYield(address tokenAddress) public onlyOwner {
-        if (tokenAddress != address(vdot) && tokenAddress != address(veth)) revert InvalidTokenAddress();
-        if (tokenAddress == address(veth)) {
-            veth.transfer(msg.sender, veth.balanceOf(address(this)));
+    function ownerWithdrawYield(uint256 depositId) public onlyOwner {
+        VaultDepositRecord memory depositRecord = depositIdToDepositRecord[depositId];
+        if (depositRecord.depositor == address(0)) revert InvalidDepositId();
+
+        if (depositRecord.tokenAddress == address(veth)) {
+            uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
+            // Calculate the underlying amount in terms of ETH
+            uint256 underlyingAmount = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
+            // Calculate current value in vETH
+            uint256 currentValue = underlyingAmount * withdrawalConversionRate / 1e18;
+            // Yield is the difference between current value and deposited amount
+            uint256 yield = currentValue > depositRecord.amountDeposited ? 
+                currentValue - depositRecord.amountDeposited : 0;
+            
+            if (yield > 0) {
+                veth.transfer(msg.sender, yield);
+                emit OwnerWithdrawYield(msg.sender, depositId, address(veth), yield, withdrawalConversionRate);
+            }
         }
-        if (tokenAddress == address(vdot)) {
-            vdot.transfer(msg.sender, vdot.balanceOf(address(this)));
+
+        if (depositRecord.tokenAddress == address(vdot)) {
+            uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(vdot)).tokenConversionRate;
+            // Calculate the underlying amount in terms of DOT
+            uint256 underlyingAmount = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
+            // Calculate current value in vDOT
+            uint256 currentValue = underlyingAmount * withdrawalConversionRate / 1e18;
+            // Yield is the difference between current value and deposited amount
+            uint256 yield = currentValue > depositRecord.amountDeposited ? 
+                currentValue - depositRecord.amountDeposited : 0;
+            
+            if (yield > 0) {
+                vdot.transfer(msg.sender, yield);
+                emit OwnerWithdrawYield(msg.sender, depositId, address(vdot), yield, withdrawalConversionRate);
+            }
         }
     }
 }
