@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {L2Slpx} from "src/L2Slpx/L2Slpx.sol";
-import {vDOT} from "src/L2Slpx/vDOT.sol";
-import {vETH} from "src/L2Slpx/vETH.sol";
+import {IL2Slpx} from "src/L2Slpx/interfaces/IL2Slpx.sol";
+import {IVDOT} from "src/L2Slpx/interfaces/IVDOT.sol";
+import {IVETH} from "src/L2Slpx/interfaces/IVETH.sol";
 
 contract YieldDelegationVault is Ownable {
 
@@ -28,9 +28,9 @@ contract YieldDelegationVault is Ownable {
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
 
-    L2Slpx public immutable l2Slpx;
-    vDOT public immutable vdot;
-    vETH public immutable veth;
+    IL2Slpx public immutable l2Slpx;
+    IVDOT public immutable vdot;
+    IVETH public immutable veth;
     uint256 public currentDepositId;
     uint256 public minimumDepositAmount;
     uint256 public totalAmountOfEthDeposited;
@@ -76,10 +76,11 @@ contract YieldDelegationVault is Ownable {
     /// @param _l2Slpx The address of the L2Slpx contract
     /// @param _vDOT The address of the vDOT contract
     /// @param _vETH the address of the vETH contract
-    constructor(address _owner, address _l2Slpx, address _vDOT, address _vETH) Ownable(_owner) {
-        l2Slpx = L2Slpx(_l2Slpx);
-        vdot = vDOT(_vDOT);
-        veth = vETH(_vETH);
+    constructor(address _owner, address _l2Slpx, address _vDOT, address _vETH, uint256 _minimumDepositAmount) Ownable(_owner) {
+        l2Slpx = IL2Slpx(_l2Slpx);
+        vdot = IVDOT(_vDOT);
+        veth = IVETH(_vETH);
+        minimumDepositAmount = _minimumDepositAmount;
     }
 
 

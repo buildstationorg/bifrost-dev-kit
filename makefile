@@ -47,3 +47,6 @@ interact:
 
 verify-contract:
 	forge verify-contract --chain-id ${CHAIN_ID} --num-of-optimizations 200 --watch --constructor-args $(cast abi-encode "constructor(address)" ${OWNER_ADDRESS}) --etherscan-api-key ${ETHERSCAN_API_KEY} --compiler-version v0.8.28+commit.7893614a ${CONTRACT_ADDRESS} src/L2Slpx/L2Slpx.sol:L2Slpx
+
+deploy-yield-delegation-vault-base-sepolia:
+	forge script script/DeployYieldDelegationVault.s.sol --rpc-url ${BASE_SEPOLIA_RPC_URL} --account dev --sender ${SENDER} --broadcast --verify --etherscan-api-key ${ETHERSCAN_API_KEY} -vvvv

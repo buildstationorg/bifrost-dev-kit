@@ -30,7 +30,7 @@ contract YieldDelegationVaultTest is Test {
         veth = new vETH(address(l2Slpx));
         vdot = new vDOT(address(l2Slpx));
         dot = new DOT(DOT_OWNER);
-        yieldDelegationVault = new YieldDelegationVault(OWNER, address(l2Slpx), address(vdot), address(veth));
+        yieldDelegationVault = new YieldDelegationVault(OWNER, address(l2Slpx), address(vdot), address(veth), 0.001 ether);
         vm.deal(USER, 1000 ether);
         vm.startPrank(DOT_OWNER);
         dot.mint(USER, 10000e18);
