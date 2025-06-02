@@ -15,6 +15,7 @@ contract YieldDelegationVault is Ownable {
     error InsufficientShares();
     error NotDepositor();
     error InvalidDepositId();
+    error InsufficientDepositAmount();
 
 
     /*//////////////////////////////////////////////////////////////
@@ -32,6 +33,7 @@ contract YieldDelegationVault is Ownable {
     vDOT public immutable vdot;
     vETH public immutable veth;
     uint256 public currentDepositId;
+    uint256 public minimumDepositAmount;
 
 
     /*//////////////////////////////////////////////////////////////
@@ -87,7 +89,7 @@ contract YieldDelegationVault is Ownable {
     /// @param amount The amount of the token
     function deposit(address tokenAddress, uint256 amount) public payable {
         if (tokenAddress != address(vdot) && tokenAddress != address(veth)) revert InvalidTokenAddress();
-        
+        if (amount < minimumDepositAmount) revert InsufficientDepositAmount();
         if (tokenAddress == address(veth)) {
             veth.transferFrom(msg.sender, address(this), amount);
             uint256 depositConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
@@ -185,17 +187,12 @@ contract YieldDelegationVault is Ownable {
     function ownerWithdrawYield(uint256 depositId) public onlyOwner {
         VaultDepositRecord memory depositRecord = depositIdToDepositRecord[depositId];
         if (depositRecord.depositor == address(0)) revert InvalidDepositId();
-
         if (depositRecord.tokenAddress == address(veth)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
-            // Calculate the underlying amount in terms of ETH
-            uint256 underlyingAmount = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
-            // Calculate current value in vETH
-            uint256 currentValue = underlyingAmount * withdrawalConversionRate / 1e18;
-            // Yield is the difference between current value and deposited amount
-            uint256 yield = currentValue > depositRecord.amountDeposited ? 
-                currentValue - depositRecord.amountDeposited : 0;
-            
+            uint256 amountOfUnderlyingDeposited = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
+            uint256 amountToBeWithdrawnByDepositor = amountOfUnderlyingDeposited * withdrawalConversionRate / 1e18;
+            uint256 yield = depositRecord.amountDeposited - amountToBeWithdrawnByDepositor;
+
             if (yield > 0) {
                 veth.transfer(msg.sender, yield);
                 emit OwnerWithdrawYield(msg.sender, depositId, address(veth), yield, withdrawalConversionRate);
@@ -204,18 +201,21 @@ contract YieldDelegationVault is Ownable {
 
         if (depositRecord.tokenAddress == address(vdot)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(vdot)).tokenConversionRate;
-            // Calculate the underlying amount in terms of DOT
-            uint256 underlyingAmount = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
-            // Calculate current value in vDOT
-            uint256 currentValue = underlyingAmount * withdrawalConversionRate / 1e18;
-            // Yield is the difference between current value and deposited amount
-            uint256 yield = currentValue > depositRecord.amountDeposited ? 
-                currentValue - depositRecord.amountDeposited : 0;
-            
+            uint256 amountOfUnderlyingDeposited = depositRecord.amountDeposited * 1e18 / depositRecord.depositConversionRate;
+            uint256 amountToBeWithdrawnByDepositor = amountOfUnderlyingDeposited * withdrawalConversionRate / 1e18;
+            uint256 yield = depositRecord.amountDeposited - amountToBeWithdrawnByDepositor;
+
             if (yield > 0) {
                 vdot.transfer(msg.sender, yield);
                 emit OwnerWithdrawYield(msg.sender, depositId, address(vdot), yield, withdrawalConversionRate);
             }
         }
     }
+
+    /// @notice Set the minimum deposit amount
+    /// @dev This function is only callable by the owner
+    /// @param _minimumDepositAmount The new minimum deposit amount
+    function setMinimumDepositAmount(uint256 _minimumDepositAmount) public onlyOwner {
+        minimumDepositAmount = _minimumDepositAmount;
+    } 
 }
