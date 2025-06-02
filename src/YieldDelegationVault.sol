@@ -15,7 +15,7 @@ contract YieldDelegationVault is Ownable {
     error NotDepositor();
     error InvalidDepositId();
     error InsufficientDepositAmount();
-
+    error InsufficientYield();
 
     /*//////////////////////////////////////////////////////////////
                             EVENTS
@@ -35,6 +35,8 @@ contract YieldDelegationVault is Ownable {
     uint256 public minimumDepositAmount;
     uint256 public totalAmountOfEthDeposited;
     uint256 public totalAmountOfDotDeposited;
+    uint256 public totalEthYieldWithdrawn;
+    uint256 public totalDotYieldWithdrawn;
 
 
     /*//////////////////////////////////////////////////////////////
@@ -188,17 +190,36 @@ contract YieldDelegationVault is Ownable {
     /// @dev This function is only callable by the owner
     function ownerWithdrawYield(address tokenAddress) public onlyOwner {
         if (tokenAddress != address(vdot) && tokenAddress != address(veth)) revert InvalidTokenAddress();
+        
         if (tokenAddress == address(veth)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(veth)).tokenConversionRate;
             uint256 totalAmountToCoverUnderlying = totalAmountOfEthDeposited * withdrawalConversionRate / 1e18;
-            uint256 yield = veth.balanceOf(address(this)) - totalAmountToCoverUnderlying;
-            emit OwnerWithdrawYield(msg.sender, address(veth), yield, withdrawalConversionRate);
+            uint256 totalYield = veth.balanceOf(address(this)) - totalAmountToCoverUnderlying;
+            uint256 availableYield = totalYield - totalEthYieldWithdrawn;
+            
+            if (availableYield == 0) revert InsufficientYield();
+            
+            totalEthYieldWithdrawn += availableYield;
+            // Transfer the yield to the owner
+            veth.transfer(msg.sender, availableYield);
+            
+            
+            emit OwnerWithdrawYield(msg.sender, address(veth), availableYield, withdrawalConversionRate);
         }
+        
         if (tokenAddress == address(vdot)) {
             uint256 withdrawalConversionRate = l2Slpx.getTokenConversionInfo(address(vdot)).tokenConversionRate;
             uint256 totalAmountToCoverUnderlying = totalAmountOfDotDeposited * withdrawalConversionRate / 1e18;
-            uint256 yield = vdot.balanceOf(address(this)) - totalAmountToCoverUnderlying;
-            emit OwnerWithdrawYield(msg.sender, address(vdot), yield, withdrawalConversionRate);
+            uint256 totalYield = vdot.balanceOf(address(this)) - totalAmountToCoverUnderlying;
+            uint256 availableYield = totalYield - totalDotYieldWithdrawn;
+            
+            if (availableYield == 0) revert InsufficientYield();
+            
+            totalDotYieldWithdrawn += availableYield;
+            // Transfer the yield to the owner
+            vdot.transfer(msg.sender, availableYield);
+            
+            emit OwnerWithdrawYield(msg.sender, address(vdot), availableYield, withdrawalConversionRate);
         }
     }
 
