@@ -50,7 +50,7 @@ vDOTAddress: address 0x5fD7476f615C53929922130DC8bf297e1a011f75
 DOTAddress: address 0x61E214E7d4DF2e619AF3F2eF4E590ABa4480259F
 ```
 
-## Polkadot Hub Westend Testnet
+## Westnet Asset Hub
 
 ```bash
 == Return ==
