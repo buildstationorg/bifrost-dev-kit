@@ -59,3 +59,12 @@ vDOTAddress: address 0x4565B7a881396F38dfF8e28830a0b614e3baC422
 DOTAddress: address 0xCa8d2C658EB4833647202FE5a431cD52aF5812E2
 ```
 
+## Passet Hub
+
+```bash
+== Return ==
+l2SlpxAddress: address 0xeB85DBa111Af2963746f1BdfFB976BE6e8f23E10
+vDOTAddress: address 0xef6f920fb3F0319C3b5188066E603F4F95ECF52c
+DOTAddress: address 0xa46f44d17cc56e960d470F5Eae5FBcAb53b03e27
+```
+
